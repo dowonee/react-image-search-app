@@ -1,7 +1,7 @@
 import Image from "../Image";
-import './styles.css';
+import "./styles.css";
 
-export default function ImageSection({pageNumber, setPageNumber, imageData, setImageData}) {
+export default function ImageSection({imageData}) {
 
   return (
     <div className="image-section">
