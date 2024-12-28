@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 export default function SearchBar({handleSearchImage, searchWord, setSearchWord}) {
   const inputSearchWord = (ev) => {
     setSearchWord(ev.target.value);
