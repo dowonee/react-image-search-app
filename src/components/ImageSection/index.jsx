@@ -4,7 +4,6 @@ import './styles.css';
 export default function ImageSection({pageNumber, setPageNumber, imageData, setImageData}) {
 
   return (
-    <>
     <div className="image-section">
       {imageData.length > 0 && imageData.map((image) => (
         <Image
@@ -14,6 +13,5 @@ export default function ImageSection({pageNumber, setPageNumber, imageData, setI
         />
       ))}
     </div>
-    </>
   );
 }
