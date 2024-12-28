@@ -1,0 +1,4 @@
+.image-section {
+  display: flex;
+  flex-wrap: wrap;
+}
