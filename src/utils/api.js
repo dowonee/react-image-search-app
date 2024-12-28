@@ -3,7 +3,7 @@ const defaultParams = `client_id=${API_KEY}`;
 
 export async function getImages(pageNumber) {
   try {
-    const imageResponse = await fetch(`https://api.unsplash.com/photos?page=${pageNumber}&${defaultParams}&per_page=15`);
+    const imageResponse = await fetch(`https://api.unsplash.com/photos?page=${pageNumber}&${defaultParams}&per_page=10`);
 
     if (!imageResponse.ok) {
       throw new Error("Fetch Error");
@@ -17,7 +17,7 @@ export async function getImages(pageNumber) {
 
 export async function getSearchImages(pageNumber, searchWord) {
   try {
-    const searchedImageResponse = await fetch(`https://api.unsplash.com/search/photos?page=${pageNumber}&query=${searchWord}&${defaultParams}&per_page=15`);
+    const searchedImageResponse = await fetch(`https://api.unsplash.com/search/photos?page=${pageNumber}&query=${searchWord}&${defaultParams}&per_page=10`);
 
     if (!searchedImageResponse.ok) {
       throw new Error("Fetch Error");
