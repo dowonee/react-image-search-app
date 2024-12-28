@@ -30,7 +30,3 @@ export async function getSearchImages(pageNumber, searchWord) {
     throw new Error(e);
   }
 }
-
-export async function getNextImageList() {
-
-}
