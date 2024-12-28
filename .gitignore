@@ -25,6 +25,3 @@ dist-ssr
 
 # environment variable file
 .env
-
-src/components
-src/utils
