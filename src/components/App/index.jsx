@@ -1,22 +1,23 @@
-import "./styles.css";
-import { useInView } from "react-intersection-observer";
 import { useState, useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 import { getImages, getSearchImages } from "../../utils/api";
 import ImageSection from "../ImageSection";
 import SearchBar from "../SearchBar";
 import Loading from "../Loading";
 import ErrorInfo from "../Error";
+import "./styles.css";
 
 export default function App() {
   const [imageData, setImageData] = useState([]);
-  const [imageLoading, setImageLoading] = useState(null);
+  const [isImageLoading, setIsImageLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchWord, setSearchWord] = useState("");
   const [loadingError, setLoadingError] = useState(null);
   const { ref, inView } = useInView({ threshold: 0.5 });
+  const [isInit, setIsInit] = useState(true);
 
-  const fetchImages = async (isInit = false) => {
-    setImageLoading(true);
+  const fetchImages = async () => {
+    setIsImageLoading(true);
     setLoadingError(null);
 
     try {
@@ -24,32 +25,35 @@ export default function App() {
         ? await getSearchImages(pageNumber, searchWord)
         : await getImages(pageNumber);
 
-        setImageData(
-          isInit ? newImages : [...imageData, ...newImages]
-        );
+      setImageData((prevImages) => isInit ? newImages : [...prevImages, ...newImages]);
+      setIsInit(false);
     } catch (e) {
       setLoadingError(e);
     } finally {
-      setImageLoading(false);
+      setIsImageLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchImages();
+    if (pageNumber > 1 || !searchWord) {
+      fetchImages();
+    }
   }, [pageNumber]);
 
   useEffect(() => {
-    if (inView && !loadingError) {
+    if (inView && !loadingError && !isImageLoading) {
       setPageNumber((prevPageNumber) => prevPageNumber + 1);
     }
   }, [inView]);
 
-  const handleSearchImage = async (ev, searchWord) => {
+  const handleSearchImage = (ev, searchWord) => {
     ev.preventDefault();
 
     setSearchWord(searchWord);
+    setImageData([]);
     setPageNumber(1);
-    fetchImages(true);
+    isInit(true);
+    fetchImages();
   }
 
   return (
@@ -60,9 +64,9 @@ export default function App() {
         searchWord={searchWord}
         setSearchWord={setSearchWord}
       />
-      {imageLoading && <Loading />}
+      {isImageLoading && <Loading />}
       {loadingError && <ErrorInfo error={loadingError} />}
-      {!imageLoading && <ImageSection imageData={imageData} />}
+      {!isImageLoading && <ImageSection imageData={imageData} />}
       <div ref={ref} style={{ height: "50px", backgroundColor: "transparent" }}></div>
     </>
   )
