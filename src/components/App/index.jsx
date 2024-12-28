@@ -1,71 +1,55 @@
-import './styles.css';
+import "./styles.css";
+import { useInView } from "react-intersection-observer";
 import { useState, useEffect } from "react";
-import { getImages, getSearchImages } from '../../utils/api';
-import ImageSection from '../ImageSection';
-import SearchBar from '../SearchBar';
-import Loading from '../Loading';
-import ErrorInfo from '../Error';
-import { useInView } from 'react-intersection-observer';
+import { getImages, getSearchImages } from "../../utils/api";
+import ImageSection from "../ImageSection";
+import SearchBar from "../SearchBar";
+import Loading from "../Loading";
+import ErrorInfo from "../Error";
 
 export default function App() {
   const [imageData, setImageData] = useState([]);
   const [imageLoading, setImageLoading] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchWord, setSearchWord] = useState("");
+  const [loadingError, setLoadingError] = useState(null);
   const { ref, inView } = useInView({ threshold: 0.5 });
 
-  const fetchImages = async () => {
+  const fetchImages = async (isInit = false) => {
     setImageLoading(true);
+    setLoadingError(null);
 
     try {
+      const newImages = searchWord
+        ? await getSearchImages(pageNumber, searchWord)
+        : await getImages(pageNumber);
 
+        setImageData(
+          isInit ? newImages : [...imageData, ...newImages]
+        );
     } catch (e) {
-      ErrorInfo(e);
+      setLoadingError(e);
+    } finally {
+      setImageLoading(false);
     }
   };
 
-  const InfiniteScroll = () => {
-
-    useEffect(async () => {
-      if (inView) {
-        loadNextImages();
-        const allImageData = await getImages(pageNumber);
-
-        setImageLoading(false);
-        setImageData([...imageData, ...allImageData]);
-        setPageNumber(page => page + 1);
-      }
-    }, [inView]);
-  };
+  useEffect(() => {
+    fetchImages();
+  }, [pageNumber]);
 
   useEffect(() => {
-    const getAllImage = async() => {
-      setImageLoading(true);
-
-      try {
-        const allImageData = await getImages(pageNumber);
-
-        setImageLoading(false);
-        setImageData([...imageData, ...allImageData]);
-        setPageNumber(page => page + 1);
-      } catch (e) {
-        throw new Error(e);
-      }
-    };
-
-    getAllImage();
-  }, []);
+    if (inView && !loadingError) {
+      setPageNumber((prevPageNumber) => prevPageNumber + 1);
+    }
+  }, [inView]);
 
   const handleSearchImage = async (ev, searchWord) => {
     ev.preventDefault();
 
-    try {
-      const searchedImage = await getSearchImages(pageNumber, searchWord);
-
-      setImageData(searchedImage);
-    } catch (e) {
-      throw new Error(e);
-    }
+    setSearchWord(searchWord);
+    setPageNumber(1);
+    fetchImages(true);
   }
 
   return (
@@ -77,16 +61,9 @@ export default function App() {
         setSearchWord={setSearchWord}
       />
       {imageLoading && <Loading />}
-      {imageLoading && <Loading />}
-      {!imageLoading && (
-        <ImageSection
-          pageNumber={pageNumber}
-          setPageNumber={setPageNumber}
-          imageData={imageData}
-          setImageData={setImageData}
-        />
-      )}
-      <div ref={ref}></div>
+      {loadingError && <ErrorInfo error={loadingError} />}
+      {!imageLoading && <ImageSection imageData={imageData} />}
+      <div ref={ref} style={{ height: "50px", backgroundColor: "transparent" }}></div>
     </>
   )
 }
