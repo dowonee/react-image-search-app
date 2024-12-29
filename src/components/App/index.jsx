@@ -14,7 +14,6 @@ export default function App() {
   const [searchWord, setSearchWord] = useState("");
   const [loadingError, setLoadingError] = useState(null);
   const { ref, inView } = useInView({ threshold: 0.5 });
-  const [isInit, setIsInit] = useState(true);
 
   const fetchImages = async () => {
     setIsImageLoading(true);
@@ -25,8 +24,7 @@ export default function App() {
         ? await getSearchImages(pageNumber, searchWord)
         : await getImages(pageNumber);
 
-      setImageData((prevImages) => isInit ? newImages : [...prevImages, ...newImages]);
-      setIsInit(false);
+      setImageData((prevImages) => pageNumber === 1 ? newImages : [...prevImages, ...newImages]);
     } catch (e) {
       setLoadingError(e);
     } finally {
@@ -52,7 +50,6 @@ export default function App() {
     setSearchWord(searchWord);
     setImageData([]);
     setPageNumber(1);
-    isInit(true);
     fetchImages();
   }
 
